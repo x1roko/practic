@@ -15,6 +15,8 @@ public partial class AppDbContext : DbContext
     {
     }
 
+    public virtual DbSet<Account> Accounts { get; set; }
+
     public virtual DbSet<PartenersType> PartenersTypes { get; set; }
 
     public virtual DbSet<Partner> Partners { get; set; }
@@ -31,6 +33,16 @@ public partial class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Account>(entity =>
+        {
+            entity.ToTable("Account");
+
+            entity.HasIndex(e => e.Login, "IX_Account").IsUnique();
+
+            entity.Property(e => e.Login).HasMaxLength(50);
+            entity.Property(e => e.Password).HasMaxLength(50);
+        });
+
         modelBuilder.Entity<PartenersType>(entity =>
         {
             entity.Property(e => e.Title).HasMaxLength(10);
@@ -46,7 +58,10 @@ public partial class AppDbContext : DbContext
                 .IsUnicode(false)
                 .IsFixedLength()
                 .HasColumnName("INN");
-            entity.Property(e => e.Phone).HasMaxLength(11);
+            entity.Property(e => e.Phone)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength();
             entity.Property(e => e.Title).HasMaxLength(50);
 
             entity.HasOne(d => d.TypeNavigation).WithMany(p => p.Partners)
